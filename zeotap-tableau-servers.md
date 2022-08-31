@@ -17,6 +17,7 @@ tableau--xxx-xxx-eu-3
 Impact: Unknown
 
 Root Causes: Some permission changes should be performed on a perticular log directory inside the /Var folder in order to run a harness shell script, however we made the permission changes for /var directory recursively, which affects the file permssions for tableu services and ssh service inside all 3 nodes of Tableau servers.
+Additionally we have run setfacl command on /var directory to a particular user to give access to the backgrounder folder which is having logs of backgrounder service. (setfacl -m u:username:rwx /var)
 
 
 Trigger: Manual execution
@@ -42,8 +43,17 @@ Rebooted the machine and from now we were able to SSH Tableau nodes. (Zeotap/Rac
 Checked the application status - tsm status -v and found that Application is not running on VM. 
 
 Day2
+We removed all ACL's from /var/opt/xxx/xxx/xxx/backgrounder (setfacl -b -R var)
 We created a clone server from an older snapshot (Jan 2022)
 Checked permssion for /var files and folder on clone server and replicated the same on Node1 Node2 and Node3
+We checked the application status again and found that it was not running.
+
+Day3
+Had a call with tableau support where support person checked the application controller status and logs, tried to debug the issue however controller was not coming up over the node1 so we have been adviced by support to re-install the tab admin conroller on node1 and check the admin controller logs after completion of installation to identify if there are any permission exceptions in the admin controller logs under /var/opt/tableau/xxx/xxx/xxx/logs/tabadmincontroller.
+We changed the permissions for particular directories which was listed as exceptions in the admin controller logs.
+At this stage there were no more permission exceptions however a new error occured-
+Caused by: java.lang.RuntimeException: org.apache.commons.exec.ExecuteException: Error while running openssl. Error Code 1. See output above for details. (Exit value: 1)
+This error was troubleshooted by client over the weekend and they made few more changes to start the tableau services on node1.
 
 
 
